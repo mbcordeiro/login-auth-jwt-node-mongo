@@ -32,13 +32,37 @@ router.post("/register", async (req, res) => {
 
   try {
     const { error } = await registerSchema.validateAsync(req.body);
-    
+
     if (error) {
       res.status(400).send(error.details[0].message);
       return;
     } else {
       const saveUser = await user.save();
       res.status(200).send("user created");
+    }
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+const loginSchema = Joi.object({
+  email: Joi.string().min(6).required().email(),
+  password: Joi.string().min(6).required(),
+});
+
+router.post("/login", async (req, res) => {
+  const user = await User.findOne({ email: req.body.email });
+  if (!user) return res.status(400).send("Incorrect Email- ID");
+
+  const validPassword = await bcrypt.compare(req.body.password, user.password);
+  if (!validPassword) return res.status(400).send("Incorrect Password");
+
+  try {
+    const { error } = await loginSchema.validateAsync(req.body);
+    if (error) return res.status(400).send(error.details[0].message);
+    else {
+      const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET);
+      res.header("auth-token", token).send(token);
     }
   } catch (error) {
     res.status(500).send(error);
