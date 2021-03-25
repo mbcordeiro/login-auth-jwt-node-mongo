@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const User = require("../models/User");
+const User = require("../../models/User");
 
 const Joi = require("@hapi/joi");
 
@@ -14,7 +14,6 @@ const registerSchema = Joi.object({
 
 router.post("/register", async (req, res) => {
   const emailExist = await User.findOne({ email: req.body.email });
-
   if (emailExist) {
     res.status(400).send("Email already exists");
     return;
@@ -32,12 +31,11 @@ router.post("/register", async (req, res) => {
 
   try {
     const { error } = await registerSchema.validateAsync(req.body);
-
     if (error) {
       res.status(400).send(error.details[0].message);
       return;
     } else {
-      const saveUser = await user.save();
+      await user.save();
       res.status(200).send("user created");
     }
   } catch (error) {

@@ -1,17 +1,13 @@
 const express = require("express");
-const app = express();
-const PORT = process.env.PORT || 3000;
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const cors = require("cors");
 
-app.get("/", (req, res) => {
-  res.send(`Hey it's working !!`);
-});
-app.listen(PORT, () => console.log(`server up and running at  ${PORT}`));
-
 const authRoute = require("./routes/auth/auth");
+const authDashboard = require("./routes/auth/authDashboard");
 
+const app = express();
+const PORT = process.env.PORT || 4050;
 dotenv.config();
 
 mongoose.connect(
@@ -22,4 +18,11 @@ mongoose.connect(
 
 app.use(express.json(), cors());
 
+app.get("/", (req, res) => {
+  res.send(`Hey it's working !!`);
+});
+
 app.use("/api/users", authRoute);
+app.use("/api/dashboard", authDashboard);
+
+app.listen(PORT, () => console.log(`server up and running at  ${PORT}`));
